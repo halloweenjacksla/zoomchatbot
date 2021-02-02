@@ -1,0 +1,23 @@
+ZoomTokenTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ZoomTokenTable-${self:provider.stage}
+    BillingMode: PAY_PER_REQUEST
+    AttributeDefinitions:
+      - AttributeName: zoomToken
+        AttributeType: S
+      - AttributeName: expires
+        AttributeType: N
+    KeySchema:
+      - AttributeName: zoomToken
+        KeyType: HASH
+    GlobalSecondaryIndexes:
+      - IndexName: zoomtokenandexpires
+        KeySchema:
+          - AttributeName: zoomToken
+            KeyType: HASH
+          - AttributeName: expires
+            KeyType: RANGE
+        Projection:
+          ProjectionType: ALL
+            

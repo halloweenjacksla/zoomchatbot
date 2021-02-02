@@ -1,0 +1,63 @@
+service: chatbot
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.7
+  lambdaHashingVersion: 20201221
+  memorySize: 128
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    zoom_client_id: wgFsa1rjSUOu72QFb9gSXA
+    zoom_client_secret: v6dut37zoBNP25OnrCuplNjVm5X7BVsW
+    zoom_bot_jid: v1ew3-0fezrnmfbhveknf6oa@xmpp.zoom.us
+    zoom_verification_token: ziHgvKUwSFmCqcAqmsY6kQ
+    ZOOM_TOKEN_TABLE: ${self:custom.ZoomTokenTable.name}
+  iamRoleStatements:
+    - ${file(iam/ZoomTokenTableIAM.yml):ZoomTokenTableIAM}
+
+custom:
+  ZoomTokenTable:
+    name: !Ref ZoomTokenTable
+    arn: !GetAtt ZoomTokenTable.Arn
+  pythonRequirments:
+    vendor: ./lib
+
+resources:
+  Resources:
+    ZoomTokenTable: ${file(resources/ZoomTokenTable.yml):ZoomTokenTable}
+
+functions:
+  hello:
+    handler: handler/handler.hello
+    package:
+      artifacts:
+    events:
+      - http:
+          method: get
+          path: /cirrushelp
+  
+  welcome:
+    handler: handler/handler.cirrusithelp
+    package:
+      artifacts:
+    events:
+      - http:
+          method: post
+          path: /cirrushelp
+
+  auth:
+    handler: handler/auth.auth
+    events:
+      - http:
+          method: get
+          path: /auth
+  
+  lib:
+    handler: handler/lib/*
+    package:
+      artifacts:
+
+plugins:
+  - serverless-python-requirements
